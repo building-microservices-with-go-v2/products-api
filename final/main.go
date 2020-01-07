@@ -8,10 +8,15 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/nicholasjackson/env"
 	"github.com/building-microservices-with-go-v2/products-api/final/handlers"
 )
 
+var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind address for the server")
+
 func main() {
+
+	env.Parse()
 
 	l := log.New(os.Stdout, "products-api ", log.LstdFlags)
 
@@ -19,8 +24,12 @@ func main() {
 
 	// create a new server
 	s := http.Server{
-		Addr:    ":9090",
-		Handler: hh,
+		Addr:    *bindAddress, // configure the bind address
+		Handler: hh, // set the default handler
+		ErrorLog: l, // set the logger for the server
+		ReadTimeout: 5*time.Second, // max time to read request from the client
+		WriteTimeout: 5*time.Second, // max time to write response to the client
+		IdleTimeout: 120*time.Second, // max time for connections using TCP Keep-Alive
 	}
 
 	// start the server
